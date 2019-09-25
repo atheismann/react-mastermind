@@ -17,3 +17,8 @@ code {
   margin: 4px;
   padding: 4px;
 }
+
+.flex-h {
+  display: flex;
+  justify-content: center;
+}
