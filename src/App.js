@@ -14,13 +14,26 @@ class App extends Component {
     // the info for our app
     this.state = {
       selColorIdx: 0,
-      guesses: [],
+      // For development, let's initialize with two guess objects
+      guesses: [this.getNewGuess(), this.getNewGuess()],
       code: this.genCode()
     };
   }
 
   genCode() {
     return new Array(4).fill().map(() => Math.floor(Math.random() * colors.length));
+  }
+
+  getNewGuess() {
+    return {
+      // TODO: for development/testing purposes
+      // code: [null, null, null, null],
+      code: [3, 2, 1, 0],
+      score: {
+        perfect: 0,
+        almost: 0,
+      }
+    };
   }
 
   render() {
@@ -36,7 +49,10 @@ class App extends Component {
         <div className="flex-h">
           <GameBoard />
           <div>
-            <ColorPicker />
+            <ColorPicker
+              colors={colors}
+              selColorIdx={this.state.guesses}
+            />
             <GameTimer />
             <NewGameButton />
           </div>

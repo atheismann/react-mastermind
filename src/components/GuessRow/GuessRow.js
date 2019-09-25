@@ -5,8 +5,11 @@ import GuessScore from '../GuessScore/GuessScore';
 
 const GuessRow = (props) => (
   <div className='flex-h'>
-    Guess Row #
-    <GuessPegs />
+    <div>{props.rowIdx + 1}</div>
+    <GuessPegs
+      colors={props.colors}
+      code={props.guess.code}
+    />
     <GuessScore />
   </div>
 );
