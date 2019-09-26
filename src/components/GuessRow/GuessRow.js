@@ -1,4 +1,3 @@
-
 import React from 'react';
 import GuessPegs from '../GuessPegs/GuessPegs';
 import GuessScore from '../GuessScore/GuessScore';
@@ -14,7 +13,7 @@ const GuessRow = (props) => (
     {
       props.currentGuess ?
         <ScoreButton /> :
-        <GuessScore />
+        <GuessScore score={props.guess.score} />
     }
   </div>
 );
