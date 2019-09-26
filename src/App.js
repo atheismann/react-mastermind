@@ -36,15 +36,16 @@ class App extends Component {
     };
   }
 
+  getWinTries() {
+    // if winner, return num guesses, otherwise 0 (no winner)
+    let lastGuess = this.state.guesses.length - 1;
+    return this.state.guesses[lastGuess].score.perfect === 4 ? lastGuess + 1 : 0;
+  }
+
   render() {
+    let winTries = this.getWinTries();
     return (
       <div className="App">
-       <button onClick={() => 
-          this.setState(state => ({selColorIdx: ++state.selColorIdx % 4}))
-        }>
-          Next color
-        </button>
-        Selected color: {colors[this.state.selColorIdx]}
         <header className="App-header">React Mastermind</header>
         <div className="flex-h">
           <GameBoard
@@ -54,13 +55,13 @@ class App extends Component {
           <div>
             <ColorPicker
               colors={colors}
-              selColorIdx={this.state.guesses}
+              selColorIdx={this.state.selColorIdx}
             />
             <GameTimer />
             <NewGameButton />
           </div>
         </div>
-        <footer>footer</footer>
+        <footer>{(winTries ? `You Won in ${winTries} Guesses!` : 'Good Luck!')}</footer>
       </div>
     );
   }
