@@ -9,31 +9,30 @@ const colors = ['#7CCCE5', '#FDE47F', '#E04644', '#B576AD'];
 
 class App extends Component {
   constructor() {
+    // super must be called before accessing 'this'
     super();
-    // state is an object that holds
-    // the info for our app
+    // state is an object that holds information
+    // in its properties
     this.state = {
       selColorIdx: 0,
-      // For development, let's initialize with two guess objects
-      guesses: [this.getNewGuess(), this.getNewGuess()],
+      guesses: [this.getNewGuess(), this.getNewGuess(), this.getNewGuess(), this.getNewGuess()],
       code: this.genCode()
     };
   }
 
-  genCode() {
-    return new Array(4).fill().map(() => Math.floor(Math.random() * colors.length));
-  }
-
   getNewGuess() {
     return {
-      // TODO: for development/testing purposes
       // code: [null, null, null, null],
-      code: [3, 2, 1, 0],
+      code: [3, 2, 1, 0], // for testing purposes
       score: {
         perfect: 0,
-        almost: 0,
+        almost: 0
       }
     };
+  }
+
+  genCode() {
+    return new Array(4).fill().map(dummy => Math.floor(Math.random() * 4));
   }
 
   getWinTries() {
@@ -46,13 +45,13 @@ class App extends Component {
     let winTries = this.getWinTries();
     return (
       <div className="App">
-        <header className="App-header">React Mastermind</header>
-        <div className="flex-h">
+        <header className='App-header-footer'>R E A C T &nbsp;&nbsp;&nbsp;  M A S T E R M I N D</header>
+        <div className="flex-h align-flex-end">
           <GameBoard
             colors={colors}
             guesses={this.state.guesses}
           />
-          <div>
+          <div className='App-controls'>
             <ColorPicker
               colors={colors}
               selColorIdx={this.state.selColorIdx}
@@ -61,7 +60,9 @@ class App extends Component {
             <NewGameButton />
           </div>
         </div>
-        <footer>{(winTries ? `You Won in ${winTries} Guesses!` : 'Good Luck!')}</footer>
+        <footer className='App-header-footer'>
+          {(winTries ? `You Won in ${winTries} Guesses!` : 'Good Luck!')}
+        </footer>
       </div>
     );
   }

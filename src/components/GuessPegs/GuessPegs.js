@@ -1,9 +1,9 @@
 import React from 'react';
 import GuessPeg from '../GuessPeg/GuessPeg';
-import './GuessPegs.css' 
+import './GuessPegs.css';
 
 const GuessPegs = (props) => (
-  <div className="GuessPegs">
+  <div className='GuessPegs'>
     <GuessPeg color={props.colors[props.code[0]]} />
     <GuessPeg color={props.colors[props.code[1]]} />
     <GuessPeg color={props.colors[props.code[2]]} />
