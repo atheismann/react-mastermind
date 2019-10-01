@@ -22,7 +22,11 @@ const GamePage = (props) => {
             selColorIdx={props.selColorIdx}
             handleColorSelection={props.handleColorSelection}
           />
-          <GameTimer />
+          <GameTimer
+            elapsedTime={props.elapsedTime}
+            handleTimerUpdate={props.handleTimerUpdate}
+            isTiming={props.isTiming}
+          />
           <Link
             className='btn btn-default GamePage-link-margin'
             to='/settings'
