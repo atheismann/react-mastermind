@@ -3,6 +3,8 @@ import './App.css';
 import GamePage from '../../pages/GamePage/GamePage';
 import { Route, Switch } from 'react-router-dom';
 import SettingsPage from '../SettingsPage/SettingsPage';
+import HighScoresPage from '../HighScoresPage/HighScoresPage';
+import scoresService from '../../utils/scoresService';
 
 const colors = {
   Easy: ['#7CCCE5', '#FDE47F', '#E04644', '#B576AD'],
@@ -13,7 +15,7 @@ const colors = {
 class App extends Component {
   constructor() {
     super();
-    this.state = {...this.getInitialState(), difficulty: 'Easy'};
+    this.state = {...this.getInitialState(), difficulty: 'Easy', scores:[]};
   }
 
   getInitialState() {
@@ -21,7 +23,6 @@ class App extends Component {
       selColorIdx: 0,
       guesses: [this.getNewGuess()],
       code: this.genCode(),
-      // new state coming in!
       elapsedTime: 0,
       isTiming: true
     };
@@ -47,6 +48,14 @@ class App extends Component {
     // if winner, return num guesses, otherwise 0 (no winner)
     let lastGuess = this.state.guesses.length - 1;
     return this.state.guesses[lastGuess].score.perfect === 4 ? lastGuess + 1 : 0;
+  }
+
+  isHighScore = (guessesCopy) => {
+    let lastScore = this.state.scores[this.state.scores.length - 1];
+    return (guessesCopy.length < lastScore.numGuesses || (
+      guessesCopy.length === lastScore.numGuesses &&
+      this.state.elapsedTime < lastScore.seconds
+    ));
   }
 
   handleTimerUpdate = () => {
@@ -134,13 +143,27 @@ class App extends Component {
     guessCopy.score = scoreCopy;
     guessesCopy[currentGuessIdx] = guessCopy;
 
-    if (perfect !== 4) guessesCopy.push(this.getNewGuess());
+    if (perfect === 4) {
+      this.setState(state => ({isTiming: false}), async function() {
+        if ((this.state.scores.length < 20 || this.isHighScore(guessesCopy))) {
+          let initials = prompt('Congrats you have a top-20 score! Enter your initials: ').substr(0, 3);
+          await scoresService.create({ initials, numGuesses: guessesCopy.length, seconds: this.state.elapsedTime });
+          this.props.history.push('/high-scores');
+        }        
+      });
+    } else {
+      guessesCopy.push(this.getNewGuess());
+    };
 
     this.setState({
       guesses: guessesCopy,
       // This is a great way to update isTiming
       isTiming: perfect !== 4
     });
+  }
+
+  handleUpdateScores = (scores) => {
+    this.setState({ scores });
   }
 
   render() {
@@ -170,6 +193,12 @@ class App extends Component {
               colorsLookup={colors}
               difficulty={this.state.difficulty}
               handleDifficultyChange={this.handleDifficultyChange}
+            />
+          } />
+          <Route exact path='/high-scores' render={props => 
+            <HighScoresPage
+              scores={this.state.scores}
+              handleUpdateScores={this.handleUpdateScores}
             />
           } />
         </Switch>
