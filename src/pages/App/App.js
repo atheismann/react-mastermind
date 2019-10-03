@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
 import './App.css';
+import { Route, Switch, Redirect } from 'react-router-dom';
 import GamePage from '../../pages/GamePage/GamePage';
-import { Route, Switch } from 'react-router-dom';
 import SettingsPage from '../SettingsPage/SettingsPage';
 import HighScoresPage from '../HighScoresPage/HighScoresPage';
+import SignupPage from '../SignupPage/SignupPage';
+import LoginPage from '../LoginPage/LoginPage';
 import scoresService from '../../utils/scoresService';
+import userService from '../../utils/userService';
 
 const colors = {
   Easy: ['#7CCCE5', '#FDE47F', '#E04644', '#B576AD'],
@@ -15,7 +18,12 @@ const colors = {
 class App extends Component {
   constructor() {
     super();
-    this.state = {...this.getInitialState(), difficulty: 'Easy', scores:[]};
+    this.state = {
+      ...this.getInitialState(), 
+      difficulty: 'Easy', 
+      scores: [],
+      user: userService.getUser()
+    };
   }
 
   getInitialState() {
@@ -58,14 +66,17 @@ class App extends Component {
     ));
   }
 
+  /*--- Callback Methods ---*/
+
   handleTimerUpdate = () => {
     this.setState((curState) => ({elapsedTime: ++curState.elapsedTime}));
   }
 
   handleDifficultyChange = (level) => {
-    this.setState({difficulty: level, ...this.getInitialState()});
+    // Use callback to ensure level is updated BEFORE calling handleNewGameClick
+    this.setState({difficulty: level}, () => this.handleNewGameClick());
   }
-
+  
   handleColorSelection = (colorIdx) => {
     this.setState({selColorIdx: colorIdx});
   }
@@ -144,7 +155,9 @@ class App extends Component {
     guessesCopy[currentGuessIdx] = guessCopy;
 
     if (perfect === 4) {
+      // Chicken dinner - need to stop the timer!
       this.setState(state => ({isTiming: false}), async function() {
+        // Do high-score logic in this callback
         if ((this.state.scores.length < 20 || this.isHighScore(guessesCopy))) {
           let initials = prompt('Congrats you have a top-20 score! Enter your initials: ').substr(0, 3);
           await scoresService.create({ initials, numGuesses: guessesCopy.length, seconds: this.state.elapsedTime });
@@ -153,7 +166,7 @@ class App extends Component {
       });
     } else {
       guessesCopy.push(this.getNewGuess());
-    };
+    }
 
     this.setState({
       guesses: guessesCopy,
@@ -166,6 +179,22 @@ class App extends Component {
     this.setState({ scores });
   }
 
+  handleLogout = () => {
+    userService.logout();
+    this.setState({ user: null });
+  }
+
+  handleSignupOrLogin = () => {
+    this.setState({user: userService.getUser()});
+  }
+
+  /*--- Lifecycle Methods ---*/
+
+  async componentDidMount() {
+    const scores = await scoresService.index();
+    this.setState({ scores });
+  }
+
   render() {
     let winTries = this.getWinTries();
     return (
@@ -174,7 +203,7 @@ class App extends Component {
         <Switch>
           <Route exact path='/' render={() =>
             <GamePage
-              winTries={winTries}
+            winTries={winTries}
               colors={colors[this.state.difficulty]}
               selColorIdx={this.state.selColorIdx}
               guesses={this.state.guesses}
@@ -185,8 +214,10 @@ class App extends Component {
               handlePegClick={this.handlePegClick}
               handleScoreClick={this.handleScoreClick}
               handleTimerUpdate={this.handleTimerUpdate}
+              handleLogout={this.handleLogout}
+              user={this.state.user}
             />
-          } />
+          }/>
           <Route exact path='/settings' render={props => 
             <SettingsPage
               {...props} 
@@ -194,13 +225,28 @@ class App extends Component {
               difficulty={this.state.difficulty}
               handleDifficultyChange={this.handleDifficultyChange}
             />
-          } />
-          <Route exact path='/high-scores' render={props => 
-            <HighScoresPage
-              scores={this.state.scores}
-              handleUpdateScores={this.handleUpdateScores}
+          }/>
+          <Route exact path='/signup' render={({ history }) => 
+            <SignupPage
+              history={history}
+              handleSignupOrLogin={this.handleSignupOrLogin}
+              
             />
-          } />
+          }/>
+          <Route exact path='/login' render={({ history }) => 
+            <LoginPage
+              history={history}
+              handleSignupOrLogin={this.handleSignupOrLogin}
+            />
+          }/>
+          <Route exact path='/high-scores' render={() => 
+            userService.getUser() ?
+              <HighScoresPage
+                scores={this.state.scores}
+                handleUpdateScores={this.handleUpdateScores}
+              /> :
+              <Redirect to='/login' />
+          }/>
         </Switch>
       </div>
     );
