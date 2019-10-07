@@ -1,3 +1,5 @@
+import tokenService from './tokenService';
+
 const BASE_URL = '/api/scores/';
 
 export default {
@@ -13,7 +15,9 @@ function create(score) {
   const options = {
     method: 'POST',
     headers: {
-      'Content-type': 'application/json'
+      'Content-type': 'application/json',
+      // Add this header - don't forget the space after Bearer
+      'Authorization': 'Bearer ' + tokenService.getToken()
     },
     body: JSON.stringify(score)
   };

@@ -1,14 +1,19 @@
 import React from 'react';
-import './GamePage.css';
+import { Link } from 'react-router-dom';
 import GameBoard from '../../components/GameBoard/GameBoard';
 import ColorPicker from '../../components/ColorPicker/ColorPicker';
 import GameTimer from '../../components/GameTimer/GameTimer';
 import NewGameButton from '../../components/NewGameButton/NewGameButton';
-import { Link } from 'react-router-dom';
+import NavBar from '../../components/NavBar/NavBar';
+import './GamePage.css';
 
 const GamePage = (props) => {
   return (
     <div className="GamePage">
+      <NavBar
+        user={props.user}
+        handleLogout={props.handleLogout}
+      />
       <div className="flex-h align-flex-end">
         <GameBoard
           colors={props.colors}
@@ -27,18 +32,8 @@ const GamePage = (props) => {
             handleTimerUpdate={props.handleTimerUpdate}
             isTiming={props.isTiming}
           />
-           <Link
-            className='btn btn-default GamePage-link-margin'
-            to='/high-scores'
-          >
-           High Scores
-          </Link>
-          <Link
-            className='btn btn-default GamePage-link-margin'
-            to='/settings'
-          >
-            Difficulty
-          </Link>
+          { props.user && <Link className='btn btn-default GamePage-link-margin' to='/high-scores'>High Scores</Link>}
+          <Link className='btn btn-default GamePage-link-margin' to='/settings'>Difficulty</Link>
           <NewGameButton handleNewGameClick={props.handleNewGameClick}/>
         </div>
       </div>
@@ -47,6 +42,7 @@ const GamePage = (props) => {
       </footer>
     </div>
   );
+
 };
 
 export default GamePage;
